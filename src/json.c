@@ -1295,7 +1295,7 @@ json_rpc_callback (void *arg)
 	  if (!param->done)
 	    {
 	      msg[content_length] = '\0';
-	      param->message = json_loads (msg, JSON_DECODE_ANY, &param->error);
+	      param->message = json_loads (msg, JSON_DECODE_ANY | JSON_ALLOW_NUL, &param->error);
 	      free (msg);
 	    }
 	}
