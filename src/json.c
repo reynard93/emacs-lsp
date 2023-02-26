@@ -1112,11 +1112,10 @@ json_rpc_send_callback (void *arg)
   // into this yet, so for now I'll just leave the order as it was
   struct timespec timeout = {.tv_sec = 0, .tv_nsec = 5000000};
   param->res = -1;
+  release_global_lock ();
+  sys_thread_yield ();
   if (can_use_handle (state, &timeout))
     {
-      release_global_lock ();
-      sys_thread_yield ();
-
       char *string = json_dumps (message, JSON_COMPACT | JSON_ENCODE_ANY);
       /* TODO: no point in copying whole message */
       size_t size = strlen (string);
@@ -1134,8 +1133,8 @@ json_rpc_send_callback (void *arg)
       end_using_handle (state);
       free (msg);
       free (string);
-      acquire_global_lock (self);
     }
+  acquire_global_lock (self);
 }
 
 static struct json_rpc_state *
