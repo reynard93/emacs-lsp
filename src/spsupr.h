@@ -1,10 +1,13 @@
 #pragma once
 
 #include <stdlib.h>
+#include <stdbool.h>
 
-struct SSP_Handle {
+struct SSP_Handle
+{
   /* Returns # of bytes sent or -1 on error */
-  int (*send) (struct SSP_Handle *ssph, void *buf, size_t sz);
+  int (*send) (struct SSP_Handle *ssph, _Bool *cancel_flag, void *buf,
+	       size_t sz);
   /* Returns 0 if no data, 1 if data received and updates ..._buf_sz,
    * -1 on error */
   int (*recv) (struct SSP_Handle *ssph, void *stdout_buf, size_t *stdout_buf_sz,
@@ -17,12 +20,14 @@ struct SSP_Handle {
   int pid;
 };
 
-struct SSP_Opts {
-	const char *binary;
-	char *const *argv; /* NULL-terminated */
-	char *const *envp; /* NULL-terminated */
-	/* 0 for polling, -1 for wait forever */
-	int read_timeout_ms;
+struct SSP_Opts
+{
+  const char *binary;
+  char *const *argv; /* NULL-terminated */
+  char *const *envp; /* NULL-terminated */
+  /* 0 for polling, -1 for wait forever */
+  int read_timeout_ms;
 };
 
-struct SSP_Handle *ssp_spawn(struct SSP_Opts *opts);
+struct SSP_Handle *
+ssp_spawn (struct SSP_Opts *opts);
