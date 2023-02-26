@@ -1386,7 +1386,10 @@ DEFUN ("json-rpc", Fjson_rpc, Sjson_rpc, 1, MANY, NULL, doc
 	}
     }
   CALLN (Ffuncall, callback, Qnil, Qnil, Qt);
-  if (pthread_mutex_lock (&param->handle_mx) == 0)
+  // timeout probably not necessary here (?), but let's rather be safe than
+  // sorry
+  struct timespec timeout = {.tv_sec = 1, .tv_nsec = 0};
+  if (pthread_mutex_timedlock (&param->handle_mx, &timeout) == 0)
     {
       param->handle->close (param->handle);
       param->handle = NULL;
