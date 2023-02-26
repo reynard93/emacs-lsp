@@ -31,6 +31,7 @@ along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "lisp.h"
 #include "intervals.h"
+#include "process.h"
 #include "spsupr.h"
 #include "thread.h"
 #include "buffer.h"
@@ -1068,6 +1069,8 @@ DEFUN ("json-rpc-connection", Fjson_rpc_connection, Sjson_rpc_connection, 1,
   opts.binary = new_argv[0];
   opts.argv = new_argv;
   opts.read_timeout_ms = -1;
+  const Lisp_Object current_dir = get_current_directory (true);
+  opts.envp = make_environment_block (current_dir);
   struct SSP_Handle *handle = ssp_spawn (&opts);
   if (!handle)
     {
