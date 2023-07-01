@@ -1217,8 +1217,7 @@ DEFUN ("json-rpc-shutdown", Fjson_rpc_shutdown, Sjson_rpc_shutdown, 1, 1, 0, doc
   state->cancel_send = true;
   /* should only block up to sndtimeo in practice, but we'll still specify a
    * timeout just in case */
-  struct timespec timeout = {.tv_sec = 1, .tv_nsec = 0};
-  if (can_use_handle (state, &timeout))
+  if (can_use_handle (state))
     {
       state->handle->cancel_recv (state->handle);
       end_using_handle (state);
