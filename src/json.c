@@ -1029,9 +1029,9 @@ end_using_handle (struct json_rpc_state *state)
   pthread_mutex_unlock (&state->handle_mx);
 }
 inline static int
-can_use_handle (struct json_rpc_state *state, struct timespec *timeout)
+can_use_handle (struct json_rpc_state *state)
 {
-  if (pthread_mutex_timedlock (&state->handle_mx, timeout) == 0)
+  if (pthread_mutex_lock (&state->handle_mx) == 0)
     {
       if (state->handle)
 	return 1; /* handle is good */
@@ -1118,11 +1118,10 @@ json_rpc_send_callback (void *arg)
   // TODO: according to @yyoncho, release_global_lock (and, I guess,
   // sys_thread_yield?) should precede can_use_handle. Haven't looked
   // into this yet, so for now I'll just leave the order as it was
-  struct timespec timeout = {.tv_sec = 0, .tv_nsec = 5000000};
   param->res = -1;
   release_global_lock ();
   sys_thread_yield ();
-  if (can_use_handle (state, &timeout))
+  if (can_use_handle (state))
     {
       char *string = NULL;
       char *msg = NULL;
@@ -1424,10 +1423,7 @@ DEFUN ("json-rpc", Fjson_rpc, Sjson_rpc, 1, MANY, NULL, doc
 	}
     }
   CALLN (Ffuncall, callback, Qnil, Qnil, Qt);
-  // timeout probably not necessary here (?), but let's rather be safe than
-  // sorry
-  struct timespec timeout = {.tv_sec = 1, .tv_nsec = 0};
-  if (pthread_mutex_timedlock (&param->handle_mx, &timeout) == 0)
+  if (pthread_mutex_lock (&param->handle_mx) == 0)
     {
       param->handle->close (param->handle);
       param->handle = NULL;
